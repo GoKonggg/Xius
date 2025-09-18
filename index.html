@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexius Admin - Summary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link.active {
+            background-color: #0ea5e9;
+            color: white !important;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+        }
+        /* Style untuk memastikan tabel retensi tidak terpotong */
+        .retention-table td, .retention-table th {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside id="sidebar-container" class="fixed inset-y-0 left-0 z-30 w-64 bg-white transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:inset-0"></aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header id="header-container" class="sticky top-0 z-20"></header>
+            
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <div id="summary" class="content-section">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <a href="reviews.html?filter_status=Needs+Attention" class="block p-6 bg-white border-l-4 border-red-500 rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <h3 class="text-sm font-semibold text-red-600">Need Attention</h3>
+                            <p id="need-attention-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                        </a>
+                        <a href="users.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <h3 class="text-sm font-semibold text-gray-500">Total Users</h3>
+                            <p id="total-users-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                        </a>
+                        <a href="leads.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <h3 class="text-sm font-semibold text-gray-500">Leads</h3>
+                            <p id="leads-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                        </a>
+                        <a href="invoices.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                           <h3 class="text-sm font-semibold text-gray-500">Revenue (This Month)</h3>
+                            <p id="revenue-amount" class="text-3xl font-bold text-gray-800 mt-2">$0</p>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800">User Retention</h3>
+                            <div id="retention-chart-container" class="overflow-x-auto">
+                                <div class="bg-gray-50 h-64 rounded-lg flex items-center justify-center">
+                                    <p class="text-gray-400">Loading chart data...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Activities</h3>
+                            <div id="recent-activities-container">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/summary.js"></script>
+</body>
+</html>

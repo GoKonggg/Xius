@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexius Admin - User Growth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-link.active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white !important;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        
+        <aside id="sidebar-container" class="fixed inset-y-0 left-0 z-30 w-64 bg-white transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:inset-0">
+            </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <a href="user-management.html" title="Back to User Management" class="flex items-center justify-center h-10 w-10 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </a>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">User Growth Analytics</h2>
+                        <p class="text-gray-500">Monthly new user registration overview.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="p-5 bg-white rounded-lg shadow-sm">
+                        <h4 class="text-sm font-semibold text-gray-500">Average Monthly Growth</h4>
+                        <p id="avg-growth" class="text-2xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                    <div class="p-5 bg-white rounded-lg shadow-sm">
+                        <h4 class="text-sm font-semibold text-gray-500">Month-over-Month Growth</h4>
+                        <p id="mom-growth" class="text-2xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                    <div class="p-5 bg-white rounded-lg shadow-sm">
+                        <h4 class="text-sm font-semibold text-gray-500">Peak Growth Month</h4>
+                        <p id="best-month" class="text-2xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                    <div class="p-5 bg-white rounded-lg shadow-sm">
+                        <h4 class="text-sm font-semibold text-gray-500">Total New Users</h4>
+                        <p id="total-new-users" class="text-2xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <canvas id="userGrowthChart" height="120"></canvas>
+                </div>
+                
+                </main>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- PRIMARY DATA SOURCE ---
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const userDataPoints = [65, 59, 80, 81, 106, 125, 140, 155, 160, 182, 195, 204];
+
+            // --- INSIGHT CALCULATIONS ---
+
+            // 1. Average Monthly Growth
+            let totalGrowth = 0;
+            for (let i = 1; i < userDataPoints.length; i++) {
+                totalGrowth += userDataPoints[i] - userDataPoints[i-1];
+            }
+            const avgGrowth = Math.round(totalGrowth / (userDataPoints.length - 1));
+            
+            // 2. Month-over-Month (MoM) Growth for the last month
+            const lastMonthValue = userDataPoints[userDataPoints.length - 1];
+            const secondLastMonthValue = userDataPoints[userDataPoints.length - 2];
+            const momGrowth = ((lastMonthValue - secondLastMonthValue) / secondLastMonthValue) * 100;
+
+            // 3. Best Growth Month
+            let maxGrowth = -Infinity;
+            let bestMonthIndex = -1;
+            for (let i = 1; i < userDataPoints.length; i++) {
+                const growthThisMonth = userDataPoints[i] - userDataPoints[i-1];
+                if (growthThisMonth > maxGrowth) {
+                    maxGrowth = growthThisMonth;
+                    bestMonthIndex = i;
+                }
+            }
+            const bestMonthName = labels[bestMonthIndex];
+
+            // 4. Total New Users during the period
+            const totalNewUsers = userDataPoints[userDataPoints.length - 1] - userDataPoints[0];
+            
+            // --- UPDATE DISPLAY (DOM MANIPULATION) ---
+            document.getElementById('avg-growth').textContent = `+${avgGrowth} Users / Month`;
+            document.getElementById('mom-growth').innerHTML = `<span class="${momGrowth >= 0 ? 'text-green-600' : 'text-red-600'}">${momGrowth.toFixed(1)}%</span> vs Last Month`;
+            document.getElementById('best-month').textContent = `${bestMonthName} (+${maxGrowth} Users)`;
+            document.getElementById('total-new-users').textContent = `${totalNewUsers} New Users`;
+            
+            // --- CHART INITIALIZATION ---
+            const ctx = document.getElementById('userGrowthChart').getContext('2d');
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    label: 'New Users per Month',
+                    data: userDataPoints,
+                    fill: true,
+                    backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                    borderColor: 'rgb(14, 165, 233)',
+                    tension: 0.3
+                }]
+            };
+
+            const config = {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Cumulative Users'
+                            }
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, config);
+        });
+    </script>
+</body>
+</html>
