@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { 
             id: 1, user: 'Siti Aminah', rating: 4, 
             text: "Aplikasinya bagus, tapi PDF hasil generate-nya kadang miring sebelah. Excel-nya sih aman.", 
-            date: '2025-09-18', status: 'Reviewed',
+            date: '2025-09-18', status: 'Positive Feedback',
             generatedFiles: [
                 { name: 'Financial_Report_Q3.xlsx', url: '#', type: 'excel' },
                 { name: 'Invoice_Summary_Sept.pdf', url: '#', type: 'pdf' }
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { 
             id: 3, user: 'Budi Santoso', rating: 5, 
             text: "Luar biasa! Sangat membantu pekerjaan saya sehari-hari. Ekspor PDF-nya rapi dan profesional.", 
-            date: '2025-09-16', status: 'Reviewed',
+            date: '2025-09-16', status: 'Positive Feedback',
             generatedFiles: [
                 { name: 'Annual_Performance_Review.pdf', url: '#', type: 'pdf' }
             ]
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { 
             id: 4, user: 'Rina Marlina', rating: 3, 
             text: "Cukup oke. Tidak ada yang spesial, tapi berfungsi sesuai yang diiklankan.", 
-            date: '2025-09-15', status: 'Reviewed',
+            date: '2025-09-15', status: 'Positive Feedback',
             generatedFiles: []
         },
         { 
@@ -114,8 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         reviews.forEach(review => {
-            const borderColors = { 'Needs Attention': 'border-red-500', 'Reviewed': 'border-gray-200', 'Hidden': 'border-gray-200' };
-            const statusClasses = { 'Needs Attention': 'bg-red-100 text-red-800', 'Reviewed': 'bg-green-100 text-green-800', 'Hidden': 'bg-gray-100 text-gray-800' };
+            const borderColors = { 'Needs Attention': 'border-red-500', 'Positive Feedback': 'border-gray-200', 'Hidden': 'border-gray-200' };
+            const statusClasses = { 'Needs Attention': 'bg-red-100 text-red-800', 'Positive Feedback': 'bg-green-100 text-green-800', 'Hidden': 'bg-gray-100 text-gray-800' };
             
             reviewsContainer.innerHTML += `
                 <div class="border ${borderColors[review.status]} p-4 rounded-lg">
