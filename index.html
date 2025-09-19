@@ -13,10 +13,6 @@
             color: white !important;
             box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
         }
-        /* Style untuk memastikan tabel retensi tidak terpotong */
-        .retention-table td, .retention-table th {
-            white-space: nowrap;
-        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -27,46 +23,56 @@
             <header id="header-container" class="sticky top-0 z-20"></header>
             
             <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
-                <div id="summary" class="content-section">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div id="summary" class="content-section space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <a href="reviews.html?filter_status=Needs+Attention" class="block p-6 bg-white border-l-4 border-red-500 rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                             <h3 class="text-sm font-semibold text-red-600">Need Attention</h3>
                             <p id="need-attention-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
                         </a>
-                        <a href="users.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <a href="user-management.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                             <h3 class="text-sm font-semibold text-gray-500">Total Users</h3>
                             <p id="total-users-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
                         </a>
-                        <a href="leads.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <a href="whatsapp-leads.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                             <h3 class="text-sm font-semibold text-gray-500">Leads</h3>
                             <p id="leads-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
                         </a>
-                        <a href="invoices.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                           <h3 class="text-sm font-semibold text-gray-500">Revenue (This Month)</h3>
+                        <a href="usage-report.html" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                           <h3 class="text-sm font-semibold text-gray-500">Revenue & Usage</h3>
                             <p id="revenue-amount" class="text-3xl font-bold text-gray-800 mt-2">$0</p>
                         </a>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
-                            <h3 class="text-lg font-semibold mb-4 text-gray-800">User Retention</h3>
-                            <div id="retention-chart-container" class="overflow-x-auto">
-                                <div class="bg-gray-50 h-64 rounded-lg flex items-center justify-center">
-                                    <p class="text-gray-400">Loading chart data...</p>
-                                </div>
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800">Sales Trend (Last 30 Days)</h3>
+                            <div class="h-64 relative">
+                                <canvas id="salesTrendChart"></canvas>
                             </div>
                         </div>
                         <div class="bg-white p-6 rounded-lg shadow-sm">
                             <h3 class="text-lg font-semibold mb-4 text-gray-800">Recent Activities</h3>
                             <div id="recent-activities-container">
-                                </div>
+                                <div class="text-center text-gray-400 py-8">Loading activities...</div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-800">Top Performing Coupons</h3>
+                            <div id="top-coupons-container">
+                                <div class="text-center text-gray-400 py-8">Loading coupon data...</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </main>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/common.js"></script>
     <script src="js/summary.js"></script>
 </body>

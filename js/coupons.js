@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // --- DUMMY COUPON DATA ---
+    // --- (PERUBAHAN) STRUKTUR DATA COUPON ---
+    // Data diubah agar lebih mudah diolah, terutama untuk kalkulasi.
     const couponsData = [
-        { code: 'HEMAT20', discount: '20%', usageCurrent: 15, usageLimit: 100, expires: '2025-10-31', status: 'Active' },
-        { code: 'DISKONBARU', discount: '$10 Off', usageCurrent: 78, usageLimit: 200, expires: '2025-12-31', status: 'Active' },
-        { code: 'WELCOME5', discount: '5%', usageCurrent: 250, usageLimit: Infinity, expires: '-', status: 'Inactive' },
-        { code: 'FREEONGKIR', discount: 'Free Shipping', usageCurrent: 152, usageLimit: 500, expires: '2025-09-30', status: 'Active' },
-        { code: 'SEPTEMBERDEAL', discount: '$25 Off', usageCurrent: 45, usageLimit: 50, expires: '2025-09-25', status: 'Active' },
-        { code: 'FLASH15', discount: '15%', usageCurrent: 98, usageLimit: 100, expires: '2025-09-20', status: 'Inactive' }
+        { code: 'HEMAT20', discountValue: 20, discountType: 'Percentage', usageCurrent: 15, usageLimit: 100, expires: '2025-10-31', status: 'Active', discountGenerated: 750 },
+        { code: 'DISKONBARU', discountValue: 10, discountType: 'Fixed', usageCurrent: 78, usageLimit: 200, expires: '2025-12-31', status: 'Active', discountGenerated: 780 },
+        { code: 'WELCOME5', discountValue: 5, discountType: 'Percentage', usageCurrent: 250, usageLimit: Infinity, expires: '-', status: 'Inactive', discountGenerated: 1250 },
+        { code: 'FREEONGKIR', discountValue: 5, discountType: 'Fixed', usageCurrent: 152, usageLimit: 500, expires: '2025-09-30', status: 'Active', discountGenerated: 760 },
+        { code: 'SEPTEMBERDEAL', discountValue: 25, discountType: 'Fixed', usageCurrent: 45, usageLimit: 50, expires: '2025-09-25', status: 'Active', discountGenerated: 1125 },
+        { code: 'FLASH15', discountValue: 15, discountType: 'Percentage', usageCurrent: 98, usageLimit: 100, expires: '2025-09-20', status: 'Inactive', discountGenerated: 1470 }
     ];
 
     // --- DOM ELEMENT SELECTION ---
@@ -15,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const activeCouponsEl = document.getElementById('active-coupons-count');
     const mostUsedCouponEl = document.getElementById('most-used-coupon');
     const totalUsageEl = document.getElementById('total-usage-count');
+    // ## PENAMBAHAN DI SINI: Elemen KPI Baru ##
+    const totalDiscountGeneratedEl = document.getElementById('total-discount-generated');
+    
     const filterMenuButton = document.getElementById('filter-menu-button');
     const filterPanel = document.getElementById('filter-panel');
     const applyFiltersBtn = document.getElementById('apply-filters-btn');
@@ -31,10 +35,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterCountBadge = document.getElementById('filter-count-badge');
 
     // --- RENDER FUNCTIONS ---
+    // ## PERUBAHAN DI SINI: Menambahkan kolom Discount Generated ##
     const renderTable = (coupons) => {
         tableBody.innerHTML = '';
         if (coupons.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-gray-500">No coupons found.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-500">No coupons found.</td></tr>`; // colspan diubah ke 7
             return;
         }
 
@@ -42,12 +47,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const statusClass = coupon.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800';
             const usageLimitDisplay = coupon.usageLimit === Infinity ? '∞' : coupon.usageLimit;
             const actionButton = coupon.status === 'Active' ? `<a href="#" class="text-gray-500 hover:text-gray-700 font-medium">Deactivate</a>` : `<a href="#" class="text-green-600 hover:text-green-800 font-medium">Activate</a>`;
+            const discountDisplay = coupon.discountType === 'Percentage' ? `${coupon.discountValue}%` : `$${coupon.discountValue} Off`;
 
             const row = `
                 <tr>
                     <td class="p-4 font-mono text-gray-800 font-medium">${coupon.code}</td>
-                    <td class="p-4 text-gray-600">${coupon.discount}</td>
+                    <td class="p-4 text-gray-600">${discountDisplay}</td>
                     <td class="p-4 text-gray-600">${coupon.usageCurrent} / ${usageLimitDisplay}</td>
+                    <td class="p-4 text-gray-800 font-bold">$${coupon.discountGenerated.toLocaleString('en-US')}</td>
                     <td class="p-4 text-gray-600">${coupon.expires}</td>
                     <td class="p-4"><span class="px-2 py-1 text-xs font-semibold ${statusClass} rounded-full">${coupon.status}</span></td>
                     <td class="p-4 space-x-4">
@@ -59,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // ## PERUBAHAN DI SINI: Menambahkan kalkulasi Total Discount Generated ##
     const updateInsights = (coupons) => {
         const activeCoupons = coupons.filter(c => c.status === 'Active');
         activeCouponsEl.textContent = activeCoupons.length;
@@ -72,6 +80,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const totalUsage = coupons.reduce((sum, current) => sum + current.usageCurrent, 0);
         totalUsageEl.textContent = totalUsage.toLocaleString('en-US');
+
+        const totalDiscount = coupons.reduce((sum, current) => sum + current.discountGenerated, 0);
+        totalDiscountGeneratedEl.textContent = `$${totalDiscount.toLocaleString('en-US')}`;
     };
     
     const renderFilterChips = () => {
@@ -79,14 +90,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let filterCount = 0;
         const filterLabels = { status: 'Status', discountType: 'Type', dateFrom: 'Expires From', dateTo: 'Expires To' };
 
-        // Select filters
         Object.keys(filterSelects).forEach(key => {
             if (filterSelects[key].value !== 'all') {
                 filterCount++;
-                filterChipsContainer.innerHTML += `<div class="flex items-center gap-2 bg-gray-200 text-gray-700 text-sm font-medium px-3 py-1 rounded-full"><span>${filterLabels[key]}: ${filterSelects[key].value}</span><button class="remove-chip-btn" data-filter-key="${key}">&times;</button></div>`;
+                filterChipsContainer.innerHTML += `<div class="flex items-center gap-2 bg-gray-200 text-gray-700 text-sm font-medium px-3 py-1 rounded-full"><span>${filterLabels[key]}: ${filterSelects[key].options[filterSelects[key].selectedIndex].text}</span><button class="remove-chip-btn" data-filter-key="${key}">&times;</button></div>`;
             }
         });
-        // Date filters
+
         if (filterDateInputs.from.value) {
             filterCount++;
             filterChipsContainer.innerHTML += `<div class="flex items-center gap-2 bg-gray-200 text-gray-700 text-sm font-medium px-3 py-1 rounded-full"><span>${filterLabels.dateFrom}: ${filterDateInputs.from.value}</span><button class="remove-chip-btn" data-filter-key="dateFrom">&times;</button></div>`;
@@ -123,22 +133,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const filteredCoupons = couponsData.filter(coupon => {
             const searchMatch = coupon.code.toLowerCase().includes(searchTerm);
             const statusMatch = statusFilter === 'all' || coupon.status === statusFilter;
-            
-            let discountTypeMatch = true;
-            if (discountTypeFilter !== 'all') {
-                if(discountTypeFilter === 'Percentage') discountTypeMatch = coupon.discount.includes('%');
-                if(discountTypeFilter === 'Fixed') discountTypeMatch = coupon.discount.includes('$');
-            }
+            const discountTypeMatch = discountTypeFilter === 'all' || coupon.discountType === discountTypeFilter;
 
             let dateMatch = true;
             if (coupon.expires !== '-') {
                 const couponDate = new Date(coupon.expires);
                 dateMatch = (!dateFrom || couponDate >= dateFrom) && (!dateTo || couponDate <= dateTo);
             } else {
-                // If coupon never expires, it shouldn't be filtered out by a date range,
-                // unless the user specifically wants to exclude non-expiring coupons.
-                // For simplicity, we include them.
-                dateMatch = true;
+                dateMatch = !dateFrom && !dateTo;
             }
             
             return searchMatch && statusMatch && discountTypeMatch && dateMatch;

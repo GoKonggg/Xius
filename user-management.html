@@ -6,6 +6,7 @@
     <title>Nexius Admin - User Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .sidebar-link.active {
@@ -19,6 +20,21 @@
         .modal {
             transition: opacity 0.3s ease;
         }
+        .chart-overview-btn {
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .chart-overview-btn:hover {
+            opacity: 1;
+        }
+        /* ## PENAMBAHAN DI SINI: Style untuk kartu filter ## */
+        .kpi-card-filter {
+            cursor: pointer;
+        }
+        .chartjs-tooltip {
+            z-index: 1000 !important; /* Atur z-index lebih tinggi */
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -30,25 +46,25 @@
             
             <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    <a href="#" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div class="block p-6 bg-white rounded-lg shadow-sm">
                         <h3 class="text-sm font-semibold text-gray-500">Total Users</h3>
-                        <p class="text-3xl font-bold text-gray-800 mt-2">1,250</p>
-                    </a>
-                    <a href="#" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <p id="total-users-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                    </div>
+                    <a id="active-customer-card" href="#" class="kpi-card-filter block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow" data-filter-status="Active" data-filter-subscription="Pro Plan">
                         <h3 class="text-sm font-semibold text-gray-500">Active Customers</h3>
-                        <p class="text-3xl font-bold text-gray-800 mt-2">306</p>
+                        <p id="active-customers-count" class="text-3xl font-bold text-gray-800 mt-2">0</p>
                     </a>
-                    <a href="#" class="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                        <h3 class="text-sm font-semibold text-gray-500">Users on Trial</h3>
-                        <p class="text-3xl font-bold text-gray-800 mt-2">112</p>
-                    </a>
+                    <div class="block p-6 bg-white rounded-lg shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-500">Avg. Repeat Order</h3>
+                        <p id="avg-repeat-order" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                    </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-sm">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">All Users</h3>
                     
                     <div class="relative">
-                        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                             <div class="relative w-full md:flex-1">
                                 <input type="text" id="user-search-input" placeholder="Search by name or email..." class="w-full pl-10 pr-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -65,37 +81,37 @@
                         </div>
                         
                         <div id="filter-panel" class="filter-panel absolute top-full right-0 mt-2 w-72 bg-white border rounded-lg shadow-xl z-10 p-4 space-y-4 origin-top-right transform scale-95 opacity-0 hidden">
-                            <h4 class="font-semibold text-gray-700">Filter by Columns</h4>
-                            <div>
-                                <label for="filter-subscription" class="block text-sm font-medium text-gray-600">Subscription</label>
-                                <select id="filter-subscription" name="subscription" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
-                                    <option value="all">All</option>
-                                    <option value="Pro Plan">Pro Plan</option>
-                                    <option value="Trial">Trial</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filter-status" class="block text-sm font-medium text-gray-600">Status</label>
-                                <select id="filter-status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
-                                    <option value="all">All</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Suspended">Suspended</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filter-source" class="block text-sm font-medium text-gray-600">Source</label>
-                                <select id="filter-source" name="source" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
-                                    <option value="all">All</option>
-                                    <option value="Organic">Organic</option>
-                                    <option value="Referral">Referral</option>
-                                    <option value="Ad Campaign">Ad Campaign</option>
-                                </select>
-                            </div>
-                            <div class="flex justify-between items-center pt-2 border-t">
-                                <button id="clear-filters-btn" class="text-sm text-gray-600 hover:text-sky-600">Clear All</button>
-                                <button id="apply-filters-btn" class="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded-md hover:bg-sky-600">Apply Filters</button>
-                            </div>
+                             <h4 class="font-semibold text-gray-700">Filter by Columns</h4>
+                             <div>
+                                 <label for="filter-subscription" class="block text-sm font-medium text-gray-600">Subscription</label>
+                                 <select id="filter-subscription" name="subscription" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                     <option value="all">All</option>
+                                     <option value="Pro Plan">Pro Plan</option>
+                                     <option value="Trial">Trial</option>
+                                     <option value="Cancelled">Cancelled</option>
+                                 </select>
+                             </div>
+                             <div>
+                                 <label for="filter-status" class="block text-sm font-medium text-gray-600">Status</label>
+                                 <select id="filter-status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                     <option value="all">All</option>
+                                     <option value="Active">Active</option>
+                                     <option value="Suspended">Suspended</option>
+                                 </select>
+                             </div>
+                             <div>
+                                 <label for="filter-source" class="block text-sm font-medium text-gray-600">Source</label>
+                                 <select id="filter-source" name="source" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                     <option value="all">All</option>
+                                     <option value="Organic">Organic</option>
+                                     <option value="Referral">Referral</option>
+                                     <option value="Ad Campaign">Ad Campaign</option>
+                                 </select>
+                             </div>
+                             <div class="flex justify-between items-center pt-2 border-t">
+                                 <button id="clear-filters-btn" class="text-sm text-gray-600 hover:text-sky-600">Clear All</button>
+                                 <button id="apply-filters-btn" class="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded-md hover:bg-sky-600">Apply Filters</button>
+                             </div>
                         </div>
                     </div>
                     
@@ -106,14 +122,35 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">User</th>
-                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Source</th>
-                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Subscription</th>
-                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">
+                                        <div class="flex items-center gap-2">
+                                            <span>Source</span>
+                                            <button class="chart-overview-btn" data-column="source" title="View Source Overview">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">
+                                        <div class="flex items-center gap-2">
+                                            <span>Subscription</span>
+                                            <button class="chart-overview-btn" data-column="subscription" title="View Subscription Overview">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Repeat Orders</th>
+                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">
+                                         <div class="flex items-center gap-2">
+                                            <span>Status</span>
+                                            <button class="chart-overview-btn" data-column="status" title="View Status Overview">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                                            </button>
+                                        </div>
+                                    </th>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="user-table-body" class="divide-y divide-gray-200">
-                                </tbody>
+                            <tbody id="user-table-body" class="divide-y divide-gray-200"></tbody>
                         </table>
                     </div>
                 </div>
@@ -121,7 +158,29 @@
         </div>
 
         <div id="user-detail-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0"></div>
+
+        <div id="chart-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden opacity-0">
+             <div class="modal-backdrop absolute inset-0 flex items-center justify-center p-4">
+                <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md transform">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <h3 id="chart-modal-title" class="text-xl font-semibold text-gray-800">Overview</h3>
+                        <button class="close-chart-modal-button text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+                    </div>
+                    <div class="p-6 relative">
+                        <div class="relative h-64 w-64 mx-auto">
+                             <canvas id="pie-chart-canvas"></canvas>
+                             <div class="p-6 relative">
+    <div class="relative h-64 w-64 mx-auto">
+         <canvas id="pie-chart-canvas"></canvas>
+         </div>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
     <script src="js/common.js"></script>
     <script src="js/users.js"></script>

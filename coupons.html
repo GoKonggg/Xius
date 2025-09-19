@@ -36,7 +36,7 @@
                         <button class="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors shadow-md shadow-sky-500/20 hover:shadow-lg hover:shadow-sky-500/30">Create New Coupon</button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div class="bg-gray-50 p-4 rounded-lg flex items-center">
                             <div class="bg-green-100 p-3 rounded-full mr-4">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -62,6 +62,15 @@
                             <div>
                                 <p class="text-sm text-gray-500">Total Usage</p>
                                 <p id="total-usage-count" class="text-2xl font-bold text-gray-800">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg flex items-center">
+                            <div class="bg-purple-100 p-3 rounded-full mr-4">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Discount Generated</p>
+                                <p id="total-discount-generated" class="text-2xl font-bold text-gray-800">$0</p>
                             </div>
                         </div>
                     </div>
@@ -130,6 +139,7 @@
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Code</th>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Discount</th>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Usage</th>
+                                    <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Discount Generated</th>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Expires</th>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Status</th>
                                     <th class="p-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Actions</th>
