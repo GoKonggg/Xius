@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- [MODIFIKASI] DATA LEADS DISESUAIKAN DENGAN TEMA AKUNTANSI ---
     const leadsData = {
         'lead1': {
             name: 'Bapak Hendra (CFO, Maju Jaya)',
@@ -9,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
             unread: 2,
             messages: [
                 { type: 'received', text: "Selamat siang, kami dari PT Maju Jaya tertarik dengan solusi Anda. Bisa kirimkan proposal untuk paket enterprise?", time: "Yesterday, 14:30" },
-                { type: 'sent', text: "Terima kasih, Pak Hendra. Tentu, proposal akan segera kami siapkan dan kirimkan ke email Anda. Tim kami akan segera review kebutuhan Bapak.", time: "Yesterday, 14:35" }
+                { type: 'sent', text: "Terima kasih, Pak Hendra. Tentu, proposal akan segera kami siapkan dan kirimkan ke email Anda.", time: "Yesterday, 14:35" }
             ]
         },
         'lead2': {
@@ -33,35 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
             messages: [
                 { type: 'received', text: "Halo, saya seorang konsultan keuangan. Apakah ada paket enterprise untuk klien korporat saya?", time: '18/09/2025' }
             ]
-        },
-        'lead4': {
-            name: 'Support Internal',
-            lastMessage: '[CLOSED] User issue resolved.',
-            timestamp: '17/09/2025',
-            unread: 0,
-            messages: [
-                { type: 'system', text: '[CLOSED] User issue regarding CSV import has been resolved.' }
-            ]
         }
     };
 
     // --- SELEKSI ELEMEN DOM ---
-    const contactListContainer = document.querySelector('.flex-1.overflow-y-auto');
+    const contactListContainer = document.getElementById('contact-list'); // [PERBAIKAN] Menggunakan ID yang spesifik
     const chatHeader = document.querySelector('.p-3.flex.items-center.border-b .font-semibold');
     const messageArea = document.querySelector('.flex-1.overflow-y-auto.p-6 .flex.flex-col.space-y-4');
-    const messageInput = document.querySelector('.flex-1.w-full.px-4.py-2.border');
+    const messageInput = document.querySelector('input[placeholder="Type a message"]');
     const sendButton = document.querySelector('.bg-sky-500.text-white.rounded-full');
-    const searchInput = document.querySelector('input[placeholder="Search"]');
+    const searchInput = document.querySelector('input[placeholder="Search or start new chat"]');
     
-    // Set chat yang aktif sesuai dengan HTML
     let activeLeadId = 'lead2'; 
 
     // --- FUNGSI-FUNGSI ---
 
-    /**
-     * Membuat daftar kontak berdasarkan array ID yang diberikan
-     * @param {string[]} idsToRender - Array ID lead yang ingin ditampilkan. Default-nya semua lead.
-     */
     const renderContactList = (idsToRender = Object.keys(leadsData)) => {
         contactListContainer.innerHTML = ''; 
         
@@ -72,11 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         idsToRender.forEach(leadId => {
             const lead = leadsData[leadId];
-            const isActive = leadId === activeLeadId ? 'bg-gray-100' : 'hover:bg-gray-50';
+            const isActive = leadId === activeLeadId ? 'bg-gray-100' : 'hover:bg-gray-100';
             const unreadBadge = lead.unread > 0 
-                ? `<span class="w-5 h-5 ${lead.unread > 15 ? 'bg-red-500' : 'bg-green-500'} text-white text-xs font-bold rounded-full flex items-center justify-center">${lead.unread}</span>` 
+                ? `<span class="w-5 h-5 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center">${lead.unread}</span>` 
                 : '';
 
+            // Menggunakan <div> sebagai pengganti <a> untuk item kontak
             const contactHtml = `
                 <div class="contact-item flex items-center p-3 cursor-pointer border-b border-gray-100 ${isActive}" data-lead-id="${leadId}">
                     <div class="flex-1">
@@ -95,10 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         addContactClickListeners();
     };
     
-    /**
-     * Menampilkan jendela obrolan untuk lead yang dipilih
-     * @param {string} leadId - ID dari lead yang akan ditampilkan
-     */
     const renderChatWindow = (leadId) => {
         const lead = leadsData[leadId];
         if (!lead) {
@@ -112,14 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         lead.messages.forEach(msg => {
             let messageHtml = '';
-            const messageTime = msg.time ? `<p class="text-xs text-gray-400 text-right mt-1">${msg.time}</p>` : '';
+            const sentTick = `<svg class="w-4 h-4 text-sky-500 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10.213 1.213a2 2 0 012.828 0l6.25 6.25a2 2 0 010 2.828l-10 10a2 2 0 01-2.828 0l-6.25-6.25a2 2 0 010-2.828l10-10zM12.04 7.96a1 1 0 00-1.414-1.414L6 11.172l-1.626-1.626a1 1 0 00-1.414 1.414l2.5 2.5a1 1 0 001.414 0l5.166-5.166z" clip-rule="evenodd" fill-rule="evenodd"></path><path d="M16.586 6.586a1 1 0 00-1.414-1.414l-5.166 5.166-1.626-1.626a1 1 0 00-1.414 1.414l2.5 2.5a1 1 0 001.414 0l6.5-6.5z"></path></svg>`;
 
             if (msg.type === 'sent') {
                 messageHtml = `
                     <div class="flex justify-end">
-                        <div class="max-w-lg p-3 rounded-lg bg-[#DCF8C6] shadow-sm">
+                        <div class="max-w-lg p-3 rounded-lg bg-wa-green-light shadow-sm">
                             <p class="text-sm text-gray-800">${msg.text}</p>
-                            ${messageTime}
+                            <div class="flex justify-end items-center mt-1">
+                                <p class="text-xs text-gray-500">${msg.time}</p>
+                                ${sentTick}
+                            </div>
                         </div>
                     </div>`;
             } else if (msg.type === 'received') {
@@ -127,26 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="flex justify-start">
                         <div class="max-w-lg p-3 rounded-lg bg-white shadow-sm">
                             <p class="text-sm text-gray-800">${msg.text}</p>
-                             ${messageTime}
-                        </div>
-                    </div>`;
-            } else if (msg.type === 'system') {
-                messageHtml = `
-                    <div class="flex justify-center">
-                        <div class="text-xs text-gray-600 bg-yellow-100/80 px-3 py-1 rounded-full">
-                            ${msg.text}
+                            <p class="text-xs text-gray-400 text-right mt-1">${msg.time}</p>
                         </div>
                     </div>`;
             }
             messageArea.innerHTML += messageHtml;
         });
 
+        // Auto-scroll to the bottom
         messageArea.parentElement.scrollTop = messageArea.parentElement.scrollHeight;
     };
 
-    /**
-     * Fungsi untuk mengirim pesan baru
-     */
     const sendMessage = () => {
         const text = messageInput.value.trim();
         if (text === '' || !activeLeadId) return;
@@ -160,15 +136,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         leadsData[activeLeadId].messages.push(newMessage);
+        leadsData[activeLeadId].lastMessage = text; // Update last message
+        leadsData[activeLeadId].timestamp = currentTime; // Update timestamp
+
         renderChatWindow(activeLeadId);
+        renderContactList(); // Re-render contact list to show new last message
 
         messageInput.value = '';
         messageInput.focus();
     };
 
-    /**
-     * Menambahkan event listener ke semua item kontak
-     */
     const addContactClickListeners = () => {
         const contactItems = document.querySelectorAll('.contact-item');
         contactItems.forEach(item => {
@@ -176,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const leadId = item.getAttribute('data-lead-id');
                 if (leadId !== activeLeadId) {
                     activeLeadId = leadId;
-                    // Saat ganti chat, reset input pencarian dan tampilkan semua kontak
                     searchInput.value = '';
                     renderContactList(); 
                     renderChatWindow(leadId);
@@ -185,21 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    /**
-     * Fungsi untuk menangani input pada search bar
-     */
     const handleSearch = () => {
         const searchTerm = searchInput.value.toLowerCase();
-        const allLeadIds = Object.keys(leadsData);
-        
-        const filteredIds = allLeadIds.filter(leadId => {
-            const leadName = leadsData[leadId].name.toLowerCase();
-            return leadName.includes(searchTerm);
-        });
-
+        const filteredIds = Object.keys(leadsData).filter(leadId => 
+            leadsData[leadId].name.toLowerCase().includes(searchTerm)
+        );
         renderContactList(filteredIds);
     };
-
 
     // --- INISIALISASI & EVENT LISTENERS ---
     sendButton.addEventListener('click', sendMessage);
@@ -212,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', handleSearch);
 
+    // Initial render
     renderContactList();
     renderChatWindow(activeLeadId);
 });
