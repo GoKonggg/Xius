@@ -1,18 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DATA PENGGUNA ---
+    // --- STRUKTUR DATA BARU (Menambahkan joinDate) ---
     const usersData = [
-        { name: 'Alex Johnson', email: 'alex.j@example.com', source: 'Organic', subscription: 'Pro Plan', status: 'Active', joinDate: '2025-08-15', repeatOrder: 5 },
-        { name: 'Samantha Bee', email: 'samantha.b@example.com', source: 'Referral', subscription: 'Trial', status: 'Active', joinDate: '2025-09-01', repeatOrder: 0 },
-        { name: 'Charles Davis', email: 'charles.d@example.com', source: 'Organic', subscription: 'Cancelled', status: 'Suspended', joinDate: '2025-01-20', repeatOrder: 12 },
-        { name: 'Maria Garcia', email: 'maria.g@example.com', source: 'Ad Campaign', subscription: 'Pro Plan', status: 'Active', joinDate: '2025-07-30', repeatOrder: 8 },
-        { name: 'Ken Tanaka', email: 'ken.t@example.com', source: 'Referral', subscription: 'Pro Plan', status: 'Active', joinDate: '2025-06-11', repeatOrder: 3 },
-        { name: 'Fatima Ahmed', email: 'fatima.a@example.com', source: 'Organic', subscription: 'Trial', status: 'Active', joinDate: '2025-09-10', repeatOrder: 1 },
-        { name: 'David Wilson', email: 'david.w@example.com', source: 'Ad Campaign', subscription: 'Cancelled', status: 'Suspended', joinDate: '2024-11-05', repeatOrder: 2 }
+        { name: 'Alex Johnson', email: 'alex.j@example.com', phone: '081234567890', source: 'Organic', rating: 5, joinDate: '2025-08-15', orderHistory: [{ date: '2025-09-15', items: 3 }, { date: '2025-08-02', items: 1 }, { date: '2025-07-21', items: 2 }] },
+        { name: 'Samantha Bee', email: 'samantha.b@example.com', phone: '081234567891', source: 'Referral', rating: 4, joinDate: '2025-09-01', orderHistory: [{ date: '2025-09-01', items: 5 }] },
+        { name: 'Charles Davis', email: 'charles.d@example.com', phone: '081234567892', source: 'Organic', rating: 5, joinDate: '2025-01-20', orderHistory: [{ date: '2025-08-20', items: 2 }, { date: '2025-06-10', items: 4 }] },
+        { name: 'Maria Garcia', email: 'maria.g@example.com', phone: '081234567893', source: 'Ad Campaign', rating: 3, joinDate: '2025-07-30', orderHistory: [{ date: '2025-07-30', items: 1 }] },
+        { name: 'Ken Tanaka', email: 'ken.t@example.com', phone: '081234567894', source: 'Referral', rating: 4, joinDate: '2025-06-11', orderHistory: [{ date: '2025-09-11', items: 3 }, { date: '2025-08-15', items: 2 }, { date: '2025-07-01', items: 1 }, { date: '2025-06-05', items: 4 }] },
+        { name: 'Fatima Ahmed', email: 'fatima.a@example.com', phone: '081234567895', source: 'Organic', rating: 5, joinDate: '2025-09-10', orderHistory: [] },
+        { name: 'David Wilson', email: 'david.w@example.com', phone: '081234567896', source: 'Ad Campaign', rating: 2, joinDate: '2024-11-05', orderHistory: [{ date: '2025-02-05', items: 1 }] }
     ];
 
-    Chart.register(ChartDataLabels);
-
-    // --- SELEKSI ELEMEN DOM ---
+    // --- SELEKSI ELEMEN DOM (Disesuaikan) ---
     const tableBody = document.getElementById('user-table-body');
     const searchInput = document.getElementById('user-search-input');
     const filterMenuButton = document.getElementById('filter-menu-button');
@@ -20,265 +18,268 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyFiltersBtn = document.getElementById('apply-filters-btn');
     const clearFiltersBtn = document.getElementById('clear-filters-btn');
     const filterSelects = {
-        subscription: document.getElementById('filter-subscription'),
-        status: document.getElementById('filter-status'),
         source: document.getElementById('filter-source')
     };
     const filterChipsContainer = document.getElementById('filter-chips-container');
     const filterCountBadge = document.getElementById('filter-count-badge');
-    const userDetailModal = document.getElementById('user-detail-modal');
-    const chartModal = document.getElementById('chart-modal');
-    const chartCanvas = document.getElementById('pie-chart-canvas');
-    const chartModalTitle = document.getElementById('chart-modal-title');
-    let pieChartInstance = null;
     
+    // KPI Cards
     const totalUsersEl = document.getElementById('total-users-count');
-    const activeCustomersEl = document.getElementById('active-customers-count');
-    const avgRepeatOrderEl = document.getElementById('avg-repeat-order');
-    const activeCustomerCard = document.getElementById('active-customer-card');
+    const totalOrdersEl = document.getElementById('total-orders-count');
+    const avgRatingEl = document.getElementById('avg-rating');
+
+    // Modals
+    const orderHistoryModal = document.getElementById('order-history-modal');
+    const orderHistoryTitle = document.getElementById('order-history-title');
+    const orderHistoryContent = document.getElementById('order-history-content');
+    const userDetailModal = document.getElementById('user-detail-modal');
+    const detailModalTitle = document.getElementById('detail-modal-title');
+    const detailModalContent = document.getElementById('detail-modal-content');
+
 
     // --- FUNGSI BANTUAN ---
-    const getSubscriptionBadge = (sub) => { const styles = { 'Pro Plan': 'text-green-800 bg-green-100', 'Trial': 'text-yellow-800 bg-yellow-100', 'Cancelled': 'text-gray-800 bg-gray-200' }; return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${styles[sub] || ''}">${sub}</span>`; };
-    const getStatusBadge = (status) => { const styles = { 'Active': 'text-green-800 bg-green-100', 'Suspended': 'text-gray-800 bg-gray-200' }; return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${styles[status] || ''}">${status}</span>`; };
-    const getSourceBadge = (source) => { const styles = { 'Organic': 'text-sky-800 bg-sky-100', 'Referral': 'text-purple-800 bg-purple-100', 'Ad Campaign': 'text-indigo-800 bg-indigo-100' }; return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${styles[source] || ''}">${source}</span>`; };
+    const getSourceBadge = (source) => { 
+        const styles = { 'Organic': 'text-sky-800 bg-sky-100', 'Referral': 'text-purple-800 bg-purple-100', 'Ad Campaign': 'text-indigo-800 bg-indigo-100' };
+        return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${styles[source] || ''}">${source}</span>`; 
+    };
+
+    const getRatingStars = (rating) => {
+        let stars = '<div class="flex items-center">';
+        for (let i = 1; i <= 5; i++) {
+            const color = i <= rating ? 'text-yellow-400' : 'text-gray-300';
+            stars += `<svg class="w-4 h-4 ${color}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+        }
+        stars += '</div>';
+        return stars;
+    };
     
     // --- FUNGSI RENDER ---
     const renderTable = (users) => {
         if (users.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No matching users found.</td></tr>`; return;
+            tableBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No matching users found.</td></tr>`; 
+            return;
         }
-        tableBody.innerHTML = users.map(user => `
-            <tr>
-                <td class="p-4 align-middle"><button class="text-left user-detail-button" data-email="${user.email}"><p class="text-sky-600 font-medium hover:underline">${user.name}</p><p class="text-xs text-gray-500">${user.email}</p></button></td>
-                <td class="p-4 align-middle">${getSourceBadge(user.source)}</td>
-                <td class="p-4 align-middle">${getSubscriptionBadge(user.subscription)}</td>
-                <td class="p-4 align-middle text-center font-medium text-gray-700">${user.repeatOrder}</td>
-                <td class="p-4 align-middle">${getStatusBadge(user.status)}</td>
-                <td class="p-4 align-middle relative"><button class="send-message-btn bg-sky-100 text-sky-700 px-3 py-1 text-sm font-medium rounded-md hover:bg-sky-200">Send Message</button></td>
-            </tr>
-        `).join('');
-        addModalEventListeners();
+        tableBody.innerHTML = users.map(user => {
+            const totalOrders = user.orderHistory.length;
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4 align-middle">
+                        <p class="font-medium text-gray-800">${user.name}</p>
+                        <p class="text-xs text-gray-500">${user.email}</p>
+                    </td>
+                    <td class="p-4 align-middle text-gray-600">${user.phone}</td>
+                    <td class="p-4 align-middle">${getSourceBadge(user.source)}</td>
+                    <td class="p-4 align-middle text-center">
+                        <button class="order-history-btn font-medium text-sky-600 hover:underline disabled:text-gray-400 disabled:no-underline" data-email="${user.email}" ${totalOrders === 0 ? 'disabled' : ''}>${totalOrders}</button>
+                    </td>
+                    <td class="p-4 align-middle">${getRatingStars(user.rating)}</td>
+                    <td class="p-4 align-middle">
+                        <button class="user-detail-btn px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200" data-email="${user.email}">Details</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     };
+    
     const renderFilterChips = () => {
-        filterChipsContainer.innerHTML = ''; let filterCount = 0; const filterLabels = { subscription: 'Subscription', status: 'Status', source: 'Source' };
-        Object.keys(filterSelects).forEach(key => {
-            const select = filterSelects[key];
-            if (select.value !== 'all') {
-                filterCount++; const chip = document.createElement('div'); chip.className = 'flex items-center gap-2 bg-gray-200 text-gray-700 text-sm font-medium px-3 py-1 rounded-full';
-                chip.innerHTML = `<span>${filterLabels[key]}: ${select.value}</span><button class="remove-chip-btn text-gray-500 hover:text-gray-800" data-filter-key="${key}">&times;</button>`;
-                filterChipsContainer.appendChild(chip);
-            }
+        filterChipsContainer.innerHTML = ''; 
+        let filterCount = 0;
+        if (filterSelects.source.value !== 'all') {
+            filterCount++;
+            const chip = document.createElement('div');
+            chip.className = 'flex items-center gap-2 bg-gray-200 text-gray-700 text-sm font-medium px-3 py-1 rounded-full';
+            chip.innerHTML = `<span>Source: ${filterSelects.source.value}</span><button class="remove-chip-btn text-gray-500 hover:text-gray-800" data-filter-key="source">&times;</button>`;
+            filterChipsContainer.appendChild(chip);
+        }
+        
+        if (filterCount > 0) { 
+            filterCountBadge.textContent = filterCount; 
+            filterCountBadge.classList.remove('hidden'); 
+        } else { 
+            filterCountBadge.classList.add('hidden'); 
+        }
+
+        document.querySelectorAll('.remove-chip-btn').forEach(button => { 
+            button.addEventListener('click', (e) => { 
+                const key = e.target.dataset.filterKey; 
+                filterSelects[key].value = 'all'; 
+                applyFilters(); 
+            }); 
         });
-        if (filterCount > 0) { filterCountBadge.textContent = filterCount; filterCountBadge.classList.remove('hidden'); } else { filterCountBadge.classList.add('hidden'); }
-        document.querySelectorAll('.remove-chip-btn').forEach(button => { button.addEventListener('click', (e) => { const key = e.target.dataset.filterKey; filterSelects[key].value = 'all'; applyFilters(); }); });
     };
+
     const updateKpiCards = (users) => {
         totalUsersEl.textContent = users.length.toLocaleString('en-US');
-        const activeCustomers = users.filter(u => u.status === 'Active' && u.subscription === 'Pro Plan').length;
-        activeCustomersEl.textContent = activeCustomers.toLocaleString('en-US');
-        if (users.length > 0) {
-            const totalRepeatOrders = users.reduce((sum, user) => sum + user.repeatOrder, 0);
-            const avgRepeat = (totalRepeatOrders / users.length).toFixed(1);
-            avgRepeatOrderEl.textContent = avgRepeat;
-        } else { avgRepeatOrderEl.textContent = 0; }
+        
+        const totalOrders = users.reduce((sum, user) => sum + user.orderHistory.length, 0);
+        totalOrdersEl.textContent = totalOrders.toLocaleString('en-US');
+        
+        const usersWithRating = users.filter(u => u.rating > 0);
+        if (usersWithRating.length > 0) {
+            const totalRating = usersWithRating.reduce((sum, user) => sum + user.rating, 0);
+            const avgRating = (totalRating / usersWithRating.length).toFixed(1);
+            avgRatingEl.innerHTML = `${avgRating} <svg class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+        } else {
+             avgRatingEl.innerHTML = `0.0 <svg class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+        }
     };
 
     // --- LOGIKA FILTER & PENCARIAN ---
     const applyFilters = () => {
         const searchTerm = searchInput.value.toLowerCase();
-        const activeFilters = { subscription: filterSelects.subscription.value, status: filterSelects.status.value, source: filterSelects.source.value };
+        const sourceFilter = filterSelects.source.value;
+        
         const filteredUsers = usersData.filter(user => {
-            const searchMatch = user.name.toLowerCase().includes(searchTerm) || user.email.toLowerCase().includes(searchTerm);
-            const subMatch = activeFilters.subscription === 'all' || user.subscription === activeFilters.subscription;
-            const statusMatch = activeFilters.status === 'all' || user.status === activeFilters.status;
-            const sourceMatch = activeFilters.source === 'all' || user.source === activeFilters.source;
-            return searchMatch && subMatch && statusMatch && sourceMatch;
+            const searchMatch = user.name.toLowerCase().includes(searchTerm) || 
+                                user.email.toLowerCase().includes(searchTerm) ||
+                                user.phone.includes(searchTerm);
+            
+            const sourceMatch = sourceFilter === 'all' || user.source === sourceFilter;
+            
+            return searchMatch && sourceMatch;
         });
+
         renderTable(filteredUsers);
         renderFilterChips();
         updateKpiCards(filteredUsers);
         toggleFilterPanel(false);
     };
 
-    // --- LOGIKA MODAL (Detail Pengguna & Pie Chart) ---
-    const openUserDetailModal = (user) => {
-        const modalContent = `<div class="modal-backdrop absolute inset-0 flex items-center justify-center p-4"><div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl transform"></div></div>`;
-        userDetailModal.innerHTML = modalContent;
-        // ... sisa fungsi openUserDetailModal
-    };
-    const closeUserDetailModal = () => {
-        userDetailModal.classList.add('opacity-0');
-        setTimeout(() => { userDetailModal.classList.add('hidden'); userDetailModal.innerHTML = ''; }, 300);
-    };
-    const addModalEventListeners = () => {
-        document.querySelectorAll('.user-detail-button').forEach(button => { button.addEventListener('click', () => { const userEmail = button.dataset.email; const user = usersData.find(u => u.email === userEmail); if (user) openUserDetailModal(user); }); });
-    };
-    
-    // Plugin centerText untuk menggambar teks langsung di canvas
-    const centerTextPlugin = {
-        id: 'centerText',
-        afterDraw: (chart) => {
-            if (chart.data.datasets[0].data.length === 0) return;
-
-            const ctx = chart.ctx;
-            const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
-            const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-            
-            const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-
-            ctx.save();
-            ctx.font = 'bold 36px Inter, sans-serif';
-            ctx.fillStyle = '#1f2937';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(total.toLocaleString('en-US'), centerX, centerY - 12);
-
-            ctx.font = '14px Inter, sans-serif';
-            ctx.fillStyle = '#6b7280';
-            ctx.fillText('Total Users', centerX, centerY + 14);
-            ctx.restore();
-        }
-    };
-
-    // Ganti fungsi renderPieChart yang lama dengan versi baru ini
-const renderPieChart = (labels, data) => {
-    if (pieChartInstance) {
-        pieChartInstance.destroy();
-    }
-
-    const centerTextPlugin = {
-        id: 'centerText',
-        afterDraw: (chart) => {
-            if (chart.data.datasets[0].data.length === 0) return;
-            const ctx = chart.ctx;
-            const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
-            const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-            const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-
-            ctx.save();
-            ctx.font = 'bold 36px Inter, sans-serif';
-            ctx.fillStyle = '#1f2937';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(total.toLocaleString('en-US'), centerX, centerY - 12);
-
-            ctx.font = '14px Inter, sans-serif';
-            ctx.fillStyle = '#6b7280';
-            ctx.fillText('Total Users', centerX, centerY + 14);
-            ctx.restore();
-        }
-    };
-
-    pieChartInstance = new Chart(chartCanvas, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: ['#38bdf8', '#a78bfa', '#fb923c', '#4ade80', '#f87171'],
-                borderColor: '#fff',
-                borderWidth: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            layout: {
-                padding: {
-                    top: 10,
-                    bottom: 10
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                        color: '#4b5563',
-                        font: { size: 12, family: 'Inter' },
-                        padding: 15,
-                        generateLabels: function(chart) {
-                            const data = chart.data;
-                            if (data.labels.length && data.datasets.length) {
-                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                return data.labels.map((label, i) => {
-                                    const value = data.datasets[0].data[i];
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0.0%';
-                                    return {
-                                        text: `${label}: ${value} (${percentage})`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        strokeStyle: data.datasets[0].backgroundColor[i],
-                                        lineWidth: 0,
-                                        hidden: isNaN(data.datasets[0].data[i]),
-                                        index: i
-                                    };
-                                });
-                            }
-                            return [];
-                        }
-                    }
-                },
-                // ## PERUBAHAN DI SINI: Tooltip dimatikan ##
-                tooltip: {
-                    enabled: false
-                },
-                datalabels: {
-                    display: false
-                }
-            }
-        },
-        plugins: [centerTextPlugin]
-    });
-};
-    const processDataForChart = (columnKey) => {
-        const counts = usersData.reduce((acc, user) => { const value = user[columnKey]; acc[value] = (acc[value] || 0) + 1; return acc; }, {});
-        return { labels: Object.keys(counts), data: Object.values(counts) };
-    };
-    
-    // ## PERUBAHAN DI SINI: Panggil resize() saat modal dibuka ##
-    const openChartModal = () => { 
-        chartModal.classList.remove('hidden'); 
+    // --- LOGIKA MODAL ---
+    const openModal = (modal) => {
+        modal.classList.remove('hidden');
         setTimeout(() => {
-            chartModal.classList.remove('opacity-0');
-            // Pastikan chart di-resize ulang setelah modal muncul dan visible
-            if (pieChartInstance) {
-                pieChartInstance.resize(); 
-            }
+            modal.classList.remove('opacity-0');
+            modal.querySelector('.modal-content').classList.remove('scale-95', '-translate-y-10');
         }, 10);
     };
-    const closeChartModal = () => { chartModal.classList.add('opacity-0'); setTimeout(() => { chartModal.classList.add('hidden'); }, 300); };
+
+    const closeModal = (modal) => {
+        const modalContent = modal.querySelector('.modal-content');
+        modal.classList.add('opacity-0');
+        if (modalContent) {
+            modalContent.classList.add('scale-95', '-translate-y-10');
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    };
+
+    const openOrderHistoryModal = (user) => {
+        orderHistoryTitle.textContent = `Order History for ${user.name}`;
+        if (user.orderHistory.length === 0) {
+            orderHistoryContent.innerHTML = `<p class="text-gray-500 text-center py-8">This user has no order history.</p>`;
+        } else {
+            orderHistoryContent.innerHTML = `
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="p-3 text-sm font-medium text-gray-600">Order Date</th>
+                            <th class="p-3 text-sm font-medium text-gray-600 text-center">Items</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        ${user.orderHistory.map(order => `
+                            <tr>
+                                <td class="p-3 text-gray-700">${order.date}</td>
+                                <td class="p-3 text-gray-700 font-medium text-center">${order.items}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        openModal(orderHistoryModal);
+    };
+
+    const openUserDetailModal = (user) => {
+        detailModalTitle.textContent = `Details for ${user.name}`;
+        const totalOrders = user.orderHistory.length;
+
+        detailModalContent.innerHTML = `
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-500 mr-4">
+                        ${user.name.charAt(0)}
+                    </div>
+                    <div>
+                        <p class="font-bold text-lg text-gray-800">${user.name}</p>
+                        <p class="text-sm text-gray-500">${user.email}</p>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <dl class="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                        <dd class="text-sm text-gray-900">${user.phone}</dd>
+                        <dt class="text-sm font-medium text-gray-500">Source</dt>
+                        <dd class="text-sm text-gray-900">${getSourceBadge(user.source)}</dd>
+                        <dt class="text-sm font-medium text-gray-500">Join Date</dt>
+                        <dd class="text-sm text-gray-900">${user.joinDate}</dd>
+                        <dt class="text-sm font-medium text-gray-500">Total Orders</dt>
+                        <dd class="text-sm text-gray-900">${totalOrders}</dd>
+                        <dt class="text-sm font-medium text-gray-500">Rating</dt>
+                        <dd class="text-sm text-gray-900">${getRatingStars(user.rating)}</dd>
+                    </dl>
+                </div>
+            </div>
+        `;
+        openModal(userDetailModal);
+    };
     
     // --- EVENT LISTENERS ---
-    const addChartEventListeners = () => {
-        document.querySelectorAll('.chart-overview-btn').forEach(button => { button.addEventListener('click', (e) => { const columnKey = e.currentTarget.dataset.column; const { labels, data } = processDataForChart(columnKey); chartModalTitle.textContent = `Overview by ${columnKey.charAt(0).toUpperCase() + columnKey.slice(1)}`; renderPieChart(labels, data); openChartModal(); }); });
-        chartModal.querySelectorAll('.close-chart-modal-button').forEach(btn => btn.addEventListener('click', closeChartModal));
-        chartModal.querySelector('.modal-backdrop').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeChartModal(); });
-    };
     const toggleFilterPanel = (forceState) => {
         const isHidden = filterPanel.classList.contains('hidden');
         if (forceState === true || (forceState === undefined && isHidden)) {
-            filterPanel.classList.remove('hidden'); setTimeout(() => { filterPanel.classList.remove('opacity-0', 'scale-95'); }, 10);
+            filterPanel.classList.remove('hidden'); 
+            setTimeout(() => { filterPanel.classList.remove('opacity-0', 'scale-95'); }, 10);
         } else {
-            filterPanel.classList.add('opacity-0', 'scale-95'); setTimeout(() => { filterPanel.classList.add('hidden'); }, 200);
+            filterPanel.classList.add('opacity-0', 'scale-95'); 
+            setTimeout(() => { filterPanel.classList.add('hidden'); }, 200);
         }
     };
-    activeCustomerCard.addEventListener('click', (e) => {
-        e.preventDefault();
-        const status = e.currentTarget.dataset.filterStatus;
-        const subscription = e.currentTarget.dataset.filterSubscription;
-        filterSelects.status.value = status;
-        filterSelects.subscription.value = subscription;
-        applyFilters();
-    });
+    
     filterMenuButton.addEventListener('click', (e) => { e.stopPropagation(); toggleFilterPanel(); });
     applyFiltersBtn.addEventListener('click', applyFilters);
-    clearFiltersBtn.addEventListener('click', () => { Object.values(filterSelects).forEach(select => select.value = 'all'); applyFilters(); });
+    clearFiltersBtn.addEventListener('click', () => { 
+        filterSelects.source.value = 'all'; 
+        applyFilters(); 
+    });
     searchInput.addEventListener('input', applyFilters);
-    document.addEventListener('click', (e) => { if (!filterPanel.contains(e.target) && !filterMenuButton.contains(e.target)) { toggleFilterPanel(false); } });
+    
+    document.addEventListener('click', (e) => { 
+        if (!filterPanel.contains(e.target) && !filterMenuButton.contains(e.target)) { 
+            toggleFilterPanel(false); 
+        } 
+    });
+
+    // Event listeners untuk semua modal
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target.classList.contains('close-modal-btn') || e.target === modal) {
+                closeModal(modal);
+            }
+        });
+    });
+
+    // Event delegation untuk tombol di dalam tabel
+    tableBody.addEventListener('click', (e) => {
+        const orderButton = e.target.closest('.order-history-btn');
+        const detailButton = e.target.closest('.user-detail-btn');
+        
+        if (orderButton) {
+            const userEmail = orderButton.dataset.email;
+            const user = usersData.find(u => u.email === userEmail);
+            if (user) openOrderHistoryModal(user);
+        }
+
+        if (detailButton) {
+            const userEmail = detailButton.dataset.email;
+            const user = usersData.find(u => u.email === userEmail);
+            if (user) openUserDetailModal(user);
+        }
+    });
 
     // --- INISIALISASI ---
     renderTable(usersData);
     updateKpiCards(usersData);
-    addChartEventListeners();
 });

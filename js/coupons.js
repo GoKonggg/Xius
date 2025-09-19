@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // --- (PERUBAHAN) STRUKTUR DATA COUPON ---
-    // Data diubah agar lebih mudah diolah, terutama untuk kalkulasi.
+    // --- STRUKTUR DATA COUPON ---
     const couponsData = [
         { code: 'HEMAT20', discountValue: 20, discountType: 'Percentage', usageCurrent: 15, usageLimit: 100, expires: '2025-10-31', status: 'Active', discountGenerated: 750 },
         { code: 'DISKONBARU', discountValue: 10, discountType: 'Fixed', usageCurrent: 78, usageLimit: 200, expires: '2025-12-31', status: 'Active', discountGenerated: 780 },
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const activeCouponsEl = document.getElementById('active-coupons-count');
     const mostUsedCouponEl = document.getElementById('most-used-coupon');
     const totalUsageEl = document.getElementById('total-usage-count');
-    // ## PENAMBAHAN DI SINI: Elemen KPI Baru ##
     const totalDiscountGeneratedEl = document.getElementById('total-discount-generated');
     
     const filterMenuButton = document.getElementById('filter-menu-button');
@@ -35,11 +33,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterCountBadge = document.getElementById('filter-count-badge');
 
     // --- RENDER FUNCTIONS ---
-    // ## PERUBAHAN DI SINI: Menambahkan kolom Discount Generated ##
     const renderTable = (coupons) => {
         tableBody.innerHTML = '';
         if (coupons.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-500">No coupons found.</td></tr>`; // colspan diubah ke 7
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-500">No coupons found.</td></tr>`;
             return;
         }
 
@@ -49,9 +46,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const actionButton = coupon.status === 'Active' ? `<a href="#" class="text-gray-500 hover:text-gray-700 font-medium">Deactivate</a>` : `<a href="#" class="text-green-600 hover:text-green-800 font-medium">Activate</a>`;
             const discountDisplay = coupon.discountType === 'Percentage' ? `${coupon.discountValue}%` : `$${coupon.discountValue} Off`;
 
+            // ## PERUBAHAN DI SINI: Menambahkan tombol copy di kolom "Code" ##
             const row = `
                 <tr>
-                    <td class="p-4 font-mono text-gray-800 font-medium">${coupon.code}</td>
+                    <td class="p-4 font-mono text-gray-800 font-medium">
+                        <div class="flex items-center gap-3">
+                            <span>${coupon.code}</span>
+                            <button class="copy-btn p-1 rounded-md hover:bg-gray-200 active:bg-gray-300" title="Copy code" data-copy-code="${coupon.code}">
+                                <svg class="w-4 h-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </td>
                     <td class="p-4 text-gray-600">${discountDisplay}</td>
                     <td class="p-4 text-gray-600">${coupon.usageCurrent} / ${usageLimitDisplay}</td>
                     <td class="p-4 text-gray-800 font-bold">$${coupon.discountGenerated.toLocaleString('en-US')}</td>
@@ -66,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    // ## PERUBAHAN DI SINI: Menambahkan kalkulasi Total Discount Generated ##
     const updateInsights = (coupons) => {
         const activeCoupons = coupons.filter(c => c.status === 'Active');
         activeCouponsEl.textContent = activeCoupons.length;
@@ -184,6 +188,32 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!filterPanel.contains(e.target) && !filterMenuButton.contains(e.target)) {
             toggleFilterPanel(false);
         }
+    });
+
+    // ## PENAMBAHAN DI SINI: Event listener untuk tombol copy dengan "event delegation" ##
+    tableBody.addEventListener('click', function(e) {
+        // Cari elemen tombol terdekat yang diklik
+        const copyButton = e.target.closest('.copy-btn');
+        
+        // Jika yang diklik bukan tombol copy, hentikan fungsi
+        if (!copyButton) return;
+
+        const codeToCopy = copyButton.dataset.copyCode;
+        navigator.clipboard.writeText(codeToCopy).then(() => {
+            // Jika berhasil, beri feedback visual
+            const originalIcon = copyButton.innerHTML;
+            copyButton.innerHTML = `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+            copyButton.disabled = true;
+
+            // Kembalikan ke ikon semula setelah 2 detik
+            setTimeout(() => {
+                copyButton.innerHTML = originalIcon;
+                copyButton.disabled = false;
+            }, 2000);
+        }).catch(err => {
+            console.error('Gagal menyalin teks: ', err);
+            // Opsional: tampilkan pesan error kepada pengguna
+        });
     });
 
     // --- INITIALIZATION ---
