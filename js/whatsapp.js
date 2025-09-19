@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const leadsData = {
         'lead1': {
+            phone: '081234567890',
             name: 'Bapak Hendra (CFO, Maju Jaya)',
             lastMessage: "Terima kasih, tim kami akan segera review...",
             timestamp: 'Yesterday',
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         },
         'lead2': {
+            phone: '081234567893',
             name: 'Ibu Sarah (Accounting)',
             lastMessage: 'Baik, saya tertarik untuk coba trial-nya.',
             timestamp: '09:41 AM',
@@ -25,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         },
         'lead3': {
+            phone: '081234567892',
             name: 'Andi - ProFinance Consultant',
             lastMessage: 'Apakah ada paket enterprise?',
             timestamp: '18/09/2025',
@@ -43,7 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendButton = document.querySelector('.bg-sky-500.text-white.rounded-full');
     const searchInput = document.querySelector('input[placeholder="Search or start new chat"]');
     
-    let activeLeadId = 'lead2'; 
+    // helper ambil query param
+const getParam = (k) => new URLSearchParams(location.search).get(k);
+
+let activeLeadId = 'lead2'; // default lama
+
+// override dari URL
+const qLeadId = getParam('leadId');
+const qPhone  = getParam('phone');
+
+if (qLeadId && leadsData[qLeadId]) {
+  activeLeadId = qLeadId;
+} else if (qPhone) {
+  const found = Object.entries(leadsData)
+    .find(([_, v]) => (v.phone || '').replace(/\s+/g,'') === qPhone.replace(/\s+/g,''));
+  if (found) activeLeadId = found[0];
+}
+ 
 
     // --- FUNGSI-FUNGSI ---
 

@@ -4,10 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Alex Johnson', email: 'alex.j@example.com', phone: '081234567890', source: 'Organic', rating: 5, joinDate: '2025-08-15', orderHistory: [{ date: '2025-09-15', items: 3 }, { date: '2025-08-02', items: 1 }, { date: '2025-07-21', items: 2 }] },
         { name: 'Samantha Bee', email: 'samantha.b@example.com', phone: '081234567891', source: 'Referral', rating: 4, joinDate: '2025-09-01', orderHistory: [{ date: '2025-09-01', items: 5 }] },
         { name: 'Charles Davis', email: 'charles.d@example.com', phone: '081234567892', source: 'Organic', rating: 5, joinDate: '2025-01-20', orderHistory: [{ date: '2025-08-20', items: 2 }, { date: '2025-06-10', items: 4 }] },
-        { name: 'Maria Garcia', email: 'maria.g@example.com', phone: '081234567893', source: 'Ad Campaign', rating: 3, joinDate: '2025-07-30', orderHistory: [{ date: '2025-07-30', items: 1 }] },
-        { name: 'Ken Tanaka', email: 'ken.t@example.com', phone: '081234567894', source: 'Referral', rating: 4, joinDate: '2025-06-11', orderHistory: [{ date: '2025-09-11', items: 3 }, { date: '2025-08-15', items: 2 }, { date: '2025-07-01', items: 1 }, { date: '2025-06-05', items: 4 }] },
-        { name: 'Fatima Ahmed', email: 'fatima.a@example.com', phone: '081234567895', source: 'Organic', rating: 5, joinDate: '2025-09-10', orderHistory: [] },
-        { name: 'David Wilson', email: 'david.w@example.com', phone: '081234567896', source: 'Ad Campaign', rating: 2, joinDate: '2024-11-05', orderHistory: [{ date: '2025-02-05', items: 1 }] }
+        
     ];
 
     // --- SELEKSI ELEMEN DOM (Disesuaikan) ---
@@ -67,7 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="font-medium text-gray-800">${user.name}</p>
                         <p class="text-xs text-gray-500">${user.email}</p>
                     </td>
-                    <td class="p-4 align-middle text-gray-600">${user.phone}</td>
+                    
+<td class="p-4 align-middle text-gray-600">
+  <a href="whatsapp-leads.html?phone=${encodeURIComponent(user.phone)}"
+     class="text-sky-600 hover:underline">
+    ${user.phone}
+  </a>
+</td>
+
                     <td class="p-4 align-middle">${getSourceBadge(user.source)}</td>
                     <td class="p-4 align-middle text-center">
                         <button class="order-history-btn font-medium text-sky-600 hover:underline disabled:text-gray-400 disabled:no-underline" data-email="${user.email}" ${totalOrders === 0 ? 'disabled' : ''}>${totalOrders}</button>
