@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="p-4 bg-gray-100 border-t flex flex-col sm:flex-row justify-end items-center gap-3">
                         <button class="w-full sm:w-auto px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">View User</button>
-                        <button class="w-full sm:w-auto px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Reply</button>
+                        
                         <button class="w-full sm:w-auto px-4 py-2 text-sm text-red-700 bg-red-100 rounded-md hover:bg-red-200">Delete</button>
                     </div>
                 </div>
