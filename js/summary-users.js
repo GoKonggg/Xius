@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // DATA BARU: Revenue dan Cost
             const revenue = isPaid ? 50000 : 0; // Rp 50.000 jika user berbayar
-            const costPerReport = 1500; // Biaya Rp 1.500 per laporan
+            const costPerReport = 0.5539; // Biaya Rp 1.500 per laporan
             const totalCost = reportsGenerated * costPerReport;
 
             mockUserData.push({ signupDate, isPaid, reportsGenerated, revenue, totalCost });
@@ -71,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Tampilkan semua data
         totalUsageEl.textContent = totalReports.toLocaleString('id-ID');
-        totalRevenueEl.textContent = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
-        totalCostEl.textContent = `Rp ${totalCost.toLocaleString('id-ID')}`;
-        totalCostPerReportEl.textContent = `Rp ${costPerReport.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
+        totalRevenueEl.textContent = `$ ${totalRevenue.toLocaleString('id-ID')}`;
+        totalCostEl.textContent = `$ ${totalCost.toLocaleString('id-ID')}`;
+        totalCostPerReportEl.textContent = `$  ${costPerReport.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
 
 
         updateActiveCardVisuals();
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             precision: 0,
                             callback: function(value) {
                                 if (activeMetric === 'revenue' || activeMetric === 'cost') {
-                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                    return '$  ' + value.toLocaleString('id-ID');
                                 }
                                 return value;
                             }
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                                 let value = context.parsed.y;
                                 if (activeMetric === 'revenue' || activeMetric === 'cost') {
-                                    label += 'Rp ' + value.toLocaleString('id-ID');
+                                    label += '$ ' + value.toLocaleString('id-ID');
                                 } else {
                                     label += value;
                                 }

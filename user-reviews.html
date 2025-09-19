@@ -1,116 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nexius Admin - Review Dashboard</title>
+  <title>Nexius Admin - Reports</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    .sidebar-link.active {
-      background-color: #0ea5e9;
-      color: white !important;
-      box-shadow: 0 4px 14px rgba(14,165,233,0.3);
-    }
-    .modal { transition: opacity .3s ease; }
+    body{font-family:'Inter',sans-serif}
+    .sidebar-link.active{background:#0ea5e9;color:#fff!important;box-shadow:0 4px 14px rgba(14,165,233,.3)}
+    .filter-panel,.modal{transition:opacity .2s ease, transform .2s ease}
   </style>
 </head>
 <body class="bg-gray-100">
   <div class="flex h-screen">
-    <!-- Sidebar -->
     <aside id="sidebar-container" class="fixed inset-y-0 left-0 z-30 w-64 bg-white transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:inset-0"></aside>
 
-    <!-- Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Header -->
       <header id="header-container" class="sticky top-0 z-20"></header>
 
-      <!-- Main -->
       <main class="flex-1 overflow-x-hidden overflow-y-auto p-6">
-        <!-- Top stats -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div class="bg-white p-6 rounded-lg shadow-sm">
-            <h3 class="text-sm font-semibold text-gray-500">Average Rating</h3>
-            <div class="flex items-center gap-2 mt-2">
-              <p id="average-rating-value" class="text-4xl font-bold text-gray-800">0.0</p>
-              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-              </svg>
+        <!-- SUMMARY CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-lg shadow-sm p-4">
+            <div class="text-sm text-gray-500 font-medium">Avg Rating</div>
+            <div class="mt-2 flex items-center gap-2">
+              <div id="avg-rating-value" class="text-3xl font-bold text-gray-900">0.0</div>
+              <div id="avg-rating-stars" class="flex"></div>
             </div>
           </div>
-
-          <button id="queue-action-required-btn" class="bg-white p-6 rounded-lg shadow-sm text-left hover:bg-gray-50 transition" aria-label="Filter Needs Attention">
-            <h3 class="text-sm font-semibold text-gray-500">Action Required</h3>
-            <p id="action-required-count" class="text-4xl font-bold text-red-600 mt-2">0</p>
-          </button>
-        </div>
-
-        <!-- Breakdown + Spotlight -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-          <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Rating Distribution</h3>
-            <div id="rating-breakdown-container" class="space-y-3"></div>
+          <div class="bg-white rounded-lg shadow-sm p-4">
+            <div class="text-sm text-gray-500 font-medium">Avg Cost</div>
+            <div id="avg-cost-value" class="mt-2 text-3xl font-bold text-gray-900">$0.0000</div>
           </div>
-
-          <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border-t-4 border-red-500">
-            <h3 class="text-lg font-semibold text-gray-800 p-6 pb-2">Spotlight: Urgent Reviews</h3>
-            <div id="spotlight-reviews-container" class="p-6 pt-2 space-y-4"></div>
+          <div class="bg-white rounded-lg shadow-sm p-4">
+            <div class="text-sm text-gray-500 font-medium">Avg Time (minute)</div>
+            <div id="avg-time-value" class="mt-2 text-3xl font-bold text-gray-900">0.0</div>
+          </div>
+          <div class="bg-white rounded-lg shadow-sm p-4">
+            <div class="text-sm text-gray-500 font-medium">Total Reports</div>
+            <div id="total-reports-value" class="mt-2 text-3xl font-bold text-gray-900">0</div>
           </div>
         </div>
 
-        <!-- Reviews list -->
+        <!-- TABLE + FILTERS -->
         <div class="bg-white rounded-lg shadow-sm">
-          <div class="p-4 border-b flex flex-col md:flex-row items-center gap-4">
-            <label class="w-full md:flex-1">
-              <span class="sr-only">Search reviews</span>
-              <input
-                type="text"
-                id="review-search-input"
-                placeholder="Search by user or keyword..."
-                class="w-full md:flex-1 px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500"
-              />
-            </label>
+          <!-- Toolbar -->
+          <div class="p-4 border-b">
+            <div class="relative flex gap-3 items-center">
+              <!-- search -->
+              <div class="relative flex-1">
+                <input id="report-search" type="text" placeholder="Search by user email..."
+                  class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 border focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+                </span>
+              </div>
+              <!-- filters button -->
+              <button id="filter-menu-button"
+                class="flex items-center gap-2 px-4 py-2 rounded-lg border bg-white hover:bg-gray-50">
+                <svg class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3h14a1 1 0 01.8 1.6L12 12v3a1 1 0 01-1.447.894l-2-1A1 1 0 018 14v-2L2.2 4.6A1 1 0 013 3z"/></svg>
+                <span>Filters</span>
+                <span id="filter-count-badge" class="hidden h-5 w-5 bg-sky-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">0</span>
+              </button>
 
-            <div class="w-full md:w-auto flex items-center gap-4">
-              <label class="w-full md:w-auto">
-                <span class="sr-only">Filter by status</span>
-                <select id="filter-status" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                  <option value="all">All Statuses</option>
-                  <option value="Positive Feedback">Positive Feedback</option>
-                  <option value="Needs Attention">Needs Attention</option>
-                </select>
-              </label>
+              <!-- floating panel -->
+              <div id="filter-panel" class="filter-panel absolute top-full right-0 mt-2 w-[680px] max-w-[calc(100vw-2rem)] bg-white border rounded-lg shadow-xl z-10 p-4 opacity-0 scale-95 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-600">Rating</label>
+                    <select id="filter-rating" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                      <option value="all">All Ratings</option>
+                      <option value="5">5 ★</option>
+                      <option value="4">4 ★</option>
+                      <option value="3">3 ★</option>
+                      <option value="2">2 ★</option>
+                      <option value="1">1 ★</option>
+                      <option value="none">No Rating</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-600">Review</label>
+                    <select id="filter-review" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                      <option value="all">All</option>
+                      <option value="has">Has Review</option>
+                      <option value="none">No Review</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-600">Date Range</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input id="date-from" type="date" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-sky-500 focus:border-sky-500">
+                      <input id="date-to"   type="date" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                  </div>
 
-              <label class="w-full md:w-auto">
-                <span class="sr-only">Sort reviews</span>
-                <select id="sort-reviews" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="highest">Highest Rating</option>
-                  <option value="lowest">Lowest Rating</option>
-                </select>
-              </label>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-600">Time (Minute)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input id="time-min" type="number" min="0" step="0.1" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-sky-500 focus:border-sky-500" placeholder="Min">
+                      <input id="time-max" type="number" min="0" step="0.1" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-sky-500 focus:border-sky-500" placeholder="Max">
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-600">Token Cost ($)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input id="cost-min" type="number" min="0" step="0.0001" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-sky-500 focus:border-sky-500" placeholder="Min">
+                      <input id="cost-max" type="number" min="0" step="0.0001" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-sky-500 focus:border-sky-500" placeholder="Max">
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-600">Quick Sort</label>
+                    <select id="sort-by" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                      <option value="newest">Newest</option>
+                      <option value="oldest">Oldest</option>
+                      <option value="cost_desc">Cost ↓</option>
+                      <option value="cost_asc">Cost ↑</option>
+                      <option value="time_desc"> Time</option>
+                      <option value="time_asc">Time</option>
+                      <option value="rating_desc">Rating ↓</option>
+                      <option value="rating_asc">Rating ↑</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 mt-3 border-t">
+                  <button id="clear-filters" class="px-3 py-2 text-sm rounded-md border bg-white hover:bg-gray-50">Clear</button>
+                  <button id="apply-filters" class="px-4 py-2 text-sm rounded-md bg-sky-600 text-white hover:bg-sky-700">Apply</button>
+                </div>
+              </div>
             </div>
+
+            <div id="filter-chips" class="mt-3 flex flex-wrap gap-2"></div>
           </div>
 
-          <div id="reviews-container" class="p-4 space-y-4"></div>
+          <!-- Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-gray-100/80 border-b">
+                <tr class="text-xs uppercase tracking-wider text-gray-600">
+                  <th class="p-3 font-semibold">User</th>
+                  <th class="p-3 font-semibold">Created At</th>
+                  <th class="p-3 font-semibold">Updated At</th>
+                  <th class="p-3 font-semibold">Time (Minute)</th>
+                  <th class="p-3 font-semibold">Cost ($)</th>
+                  <th class="p-3 font-semibold">Rating</th>
+                  <th class="p-3 font-semibold">Review</th>
+                  <th class="p-3 font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody id="reports-tbody" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
+
+          <div class="flex items-center justify-between p-3 border-t text-sm bg-gray-50 rounded-b-lg">
+            <div id="page-stats" class="text-gray-500"></div>
+            <div class="flex gap-2 items-center">
+              <button id="prev-page" class="px-3 py-1.5 rounded border bg-white hover:bg-gray-50">Previous</button>
+              <span id="page-info" class="px-2 py-1.5 text-gray-600"></span>
+              <button id="next-page" class="px-3 py-1.5 rounded border bg-white hover:bg-gray-50">Next</button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
 
-    <!-- Modal root -->
-    <div
-      id="review-detail-modal"
-      class="modal fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="review-detail-title">
-    </div>
+    <!-- Detail Modal -->
+    <div id="report-detail-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0" role="dialog" aria-modal="true"></div>
   </div>
 
-  <!-- Scripts -->
   <script src="js/common.js"></script>
-  <script src="js/reviews.js"></script>
+  <script src="js/reports.js"></script>
 </body>
 </html>
