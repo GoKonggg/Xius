@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Data untuk Kartu KPI di Atas
     const kpiData = {
         needAttention: 2,
-        totalUsers: 1250,
+        totalUsers: 7,
         leads: 42,
         revenue: 12800,
     };
